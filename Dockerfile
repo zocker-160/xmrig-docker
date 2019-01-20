@@ -2,7 +2,7 @@ FROM ubuntu:xenial
 
 RUN apt-get update && apt-get install -y wget
 
-ENV XMRIG_VERSION=2.9.3 XMRIG_SHA256=a3495c2a8217536b37a84217010eab0d872974eb778db9fd9d3d1d1dfe22dbe0
+ENV XMRIG_VERSION=2.9.4 XMRIG_SHA256=6a376318c1e5576807aac056bdf9fb7153187c61596ab0f49fcfbc3c15a67e4c
 
 RUN useradd -ms /bin/bash monero
 USER monero
