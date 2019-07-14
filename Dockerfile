@@ -1,19 +1,21 @@
-FROM ubuntu:xenial
+FROM ubuntu:latest AS build
 
-RUN apt-get update && apt-get install -y wget
+ARG XMRIG_VERSION='v2.14.4'
 
-ENV XMRIG_VERSION=2.14.4 XMRIG_SHA256=278d5bbb4d67caa9c21e47128a3091941301ca1420de355c91619b9dcc934297
+RUN apt-get update && apt-get install -y git build-essential cmake libuv1-dev libssl-dev
+WORKDIR /root
+RUN git clone https://github.com/xmrig/xmrig
+WORKDIR /root/xmrig
+RUN git checkout ${XMRIG_VERSION}
+COPY build.patch /root/xmrig/
+RUN git apply build.patch
+RUN mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENSSL_USE_STATIC_LIBS=TRUE -DWITH_HTTPD=OFF && make
 
+FROM ubuntu:latest
 RUN useradd -ms /bin/bash monero
 USER monero
 WORKDIR /home/monero
-
-RUN wget https://github.com/xmrig/xmrig/releases/download/v${XMRIG_VERSION}/xmrig-${XMRIG_VERSION}-xenial-x64.tar.gz &&\
-  tar -xvzf xmrig-${XMRIG_VERSION}-xenial-x64.tar.gz &&\
-  mv xmrig-${XMRIG_VERSION}/xmrig . &&\
-  rm -rf xmrig-${XMRIG_VERSION} &&\
-  rm xmrig-${XMRIG_VERSION}-xenial-x64.tar.gz &&\
-  echo "${XMRIG_SHA256}  xmrig" | sha256sum -c -
+COPY --from=build --chown=monero /root/xmrig/build/xmrig /home/monero
 
 ENTRYPOINT ["./xmrig"]
 CMD ["--url=pool.supportxmr.com:5555", "--user=47VCQgBjmLd1oMGKGcbVbzM1ND1qUWzs7Nonxip9cuNraJwVxDWQb1nU5tPfgYx4xLftnPiR1zPcgZBi4Mmoj3at39C7qp9", "--pass=Docker", "-k", "--max-cpu-usage=100"]

