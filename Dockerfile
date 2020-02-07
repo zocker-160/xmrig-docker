@@ -1,6 +1,6 @@
 FROM ubuntu:latest AS build
 
-ARG XMRIG_VERSION='v5.5.2'
+ARG XMRIG_VERSION='v5.5.3'
 
 RUN apt-get update && apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
 WORKDIR /root
