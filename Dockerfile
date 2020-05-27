@@ -14,7 +14,7 @@ RUN git apply build.patch
 RUN mkdir build && cd build && cmake .. -DOPENSSL_USE_STATIC_LIBS=TRUE && make
 
 FROM ubuntu:latest
-RUN apt-get update && apt-get install -y libhwloc5
+RUN apt-get update && apt-get install -y libhwloc15
 RUN useradd -ms /bin/bash monero
 USER monero
 WORKDIR /home/monero
