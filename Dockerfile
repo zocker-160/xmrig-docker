@@ -9,8 +9,6 @@ WORKDIR /root
 RUN git clone https://github.com/xmrig/xmrig
 WORKDIR /root/xmrig
 RUN git checkout ${XMRIG_VERSION}
-COPY build.patch /root/xmrig/
-RUN git apply build.patch
 RUN mkdir build && cd build && cmake .. -DOPENSSL_USE_STATIC_LIBS=TRUE && make
 
 FROM ubuntu:latest
