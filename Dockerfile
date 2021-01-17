@@ -13,7 +13,7 @@ RUN mkdir build && cd build && cmake .. -DOPENSSL_USE_STATIC_LIBS=TRUE && make
 
 FROM ubuntu:latest
 RUN apt-get update && apt-get install -y libhwloc15
-WORKDIR /root/xmrig/build/
+WORKDIR /root/xmrig/build
 
-ENTRYPOINT ["./xmrig"]
+ENTRYPOINT ["/root/xmrig/build/xmrig"]
 CMD ["--url=pool.supportxmr.com:3333", "--user=49ZNRzJYncy5KaabHuMXqHcfRCg8WR7xULjf5YJyXtoYcSM4j6EYhQR8rne8Ee4Fk3XDNi61wEDmMXtfMKKLdKXZ5JUVhkj", "--pass=Docker", "-k", "--coin=monero"]˚
